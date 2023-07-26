@@ -9,12 +9,13 @@ if (isset($_GET['q'])) {
   // Separate the input by commas to get individual words
   $words = explode(',', $input);
 
-  // Fetch all tags from the database
-  $stmt = $db->prepare("SELECT DISTINCT tags FROM images");
+  // Fetch all tags and titles from the database
+  $stmt = $db->prepare("SELECT DISTINCT tags, title FROM images");
   $result = $stmt->execute();
 
-  // Store all tags in a flat array
+  // Store all tags and titles in separate arrays
   $allTags = array();
+  $allTitles = array();
   while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
     $tags = explode(',', $row['tags']);
     foreach ($tags as $tag) {
@@ -23,9 +24,14 @@ if (isset($_GET['q'])) {
         $allTags[] = $suggestion;
       }
     }
+
+    $title = $row['title'];
+    if (!in_array($title, $allTitles)) {
+      $allTitles[] = $title;
+    }
   }
 
-  // Filter the tags based on each word and store the suggestions
+  // Filter the tags and titles based on each word and store the suggestions
   $suggestions = array();
   foreach ($words as $word) {
     $trimmedWord = trim($word);
@@ -33,6 +39,13 @@ if (isset($_GET['q'])) {
       // Check if the tag starts with the word
       if (stripos($tag, $trimmedWord) === 0) {
         $suggestions[] = $tag;
+      }
+    }
+
+    foreach ($allTitles as $title) {
+      // Check if the title starts with the word
+      if (stripos($title, $trimmedWord) === 0) {
+        $suggestions[] = $title;
       }
     }
   }
