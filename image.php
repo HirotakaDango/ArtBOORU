@@ -124,7 +124,7 @@ $image = $stmt->fetch();
               if (!empty($tag)) {
             ?>
               <a href="tagged_images.php?tag=<?php echo urlencode($tag); ?>"
-                class="btn btn-sm btn-outline-dark">
+                class="btn btn-sm mb-1 btn-outline-dark">
                 <?php echo $tag; ?>
               </a>
                 <?php
