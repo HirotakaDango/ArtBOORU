@@ -109,7 +109,7 @@ if (isset($_FILES['image'])) {
     }
   }
 
-  header("Location: index.php");
+  header("Location: profile.php");
   exit;
 }
 ?>

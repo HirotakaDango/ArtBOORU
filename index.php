@@ -103,6 +103,7 @@ $result = $stmt->execute();
                 var a = document.createElement("a");
                 a.classList.add("dropdown-item");
                 a.textContent = suggestion;
+                a.href = "#";
                 a.onclick = function () {
                   addTag(input, suggestionsId, suggestion);
                 };
