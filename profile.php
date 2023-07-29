@@ -19,29 +19,6 @@
   $desc = $row['desc'];
   $bgpic = $row['bgpic'];
 
-  // Count the number of followers
-  $stmt = $db->prepare("SELECT COUNT(*) AS num_followers FROM following WHERE following_username = :username");
-  $stmt->bindValue(':username', $username);
-  $result = $stmt->execute();
-  $row = $result->fetchArray();
-  $num_followers = $row['num_followers'];
-
-  // Count the number of following
-  $stmt = $db->prepare("SELECT COUNT(*) AS num_following FROM following WHERE follower_username = :username");
-  $stmt->bindValue(':username', $username);
-  $result = $stmt->execute();
-  $row = $result->fetchArray();
-  $num_following = $row['num_following'];
-
-  // Handle the user's click on the "Favorite" button
-  if (isset($_POST['favorite'])) {
-    $filename = $_POST['filename'];
-    $stmt = $db->prepare("UPDATE images SET favorite = 1 WHERE filename = :filename AND username = :username");
-    $stmt->bindValue(':filename', $filename);
-    $stmt->bindValue(':username', $_SESSION['username']);
-    $stmt->execute();
-  }
-
   // Get all of the images uploaded by the current user
   $stmt = $db->prepare("SELECT * FROM images WHERE username = :username ORDER BY id DESC");
   $stmt->bindValue(':username', $username);
@@ -80,6 +57,7 @@
         </div>
       <?php endwhile; ?>
     </div>
+    <div class="mt-5"></div>
     <style>
       .images {
         display: grid;
