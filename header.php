@@ -1,11 +1,16 @@
     <nav class="navbar navbar-expand-md navbar-expand-lg bg-body-tertiary mb-2">
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="index.php">ArtBOORU</a>
-        <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="mb-1 btn d-md-none d-lg-none btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <i class="bi bi-list p-1 fs-5" style="-webkit-text-stroke: 1px;"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-bold">
+          <form class="d-flex" role="search" action="search.php">
+            <input class="form-control me-2" name="search" type="search" placeholder="Search" aria-label="Search" onkeyup="showSuggestions(this, 'suggestions2')" />
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
+          <div class="container-fluid" id="suggestions2"></div>
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 fw-bold">
             <li class="nav-item">
               <a class="nav-link" href="index.php">Home</a>
             </li>
@@ -25,14 +30,23 @@
               <a class="nav-link" href="logout.php">Logout</a>
             </li>
           </ul>
-          <form class="d-flex" role="search" action="search.php">
-            <input class="form-control me-2" name="search" type="search" placeholder="Search" aria-label="Search" onkeyup="showSuggestions(this, 'suggestions2')" />
-            <button class="btn btn-outline-success" type="submit">Search</button>
-          </form>
-         <div id="suggestions2"></div> 
-       </div>
+        </div>
       </div>
     </nav>
+    <style>
+      @media screen and (min-width: 768px) {
+        #suggestions2 {
+          position: absolute;
+          top: 60px; /* Adjust this value as needed to position the sidebar below the navbar */
+          left: 0px; /* Adjust this value as needed to position the sidebar from the right edge */
+          width: 200px; /* Adjust this value as needed to set the width of the sidebar */
+          background-color: #fff; /* Set the background color of the sidebar */
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow effect */
+          z-index: 1; /* Make sure the sidebar appears above other elements if necessary */
+          width: 100%;
+        }
+      }
+    </style>
     <script>
       var suggestedTags = {};
 
@@ -67,7 +81,7 @@
 
             // Create a dropdown for suggestions using Bootstrap classes
             var dropdownDiv = document.createElement("div");
-            dropdownDiv.classList.add("dropdown-menu", "show");
+            dropdownDiv.classList.add("dropdown-menu", "dropdown-menu-start", "card", "border-0", "w-100", "show");
 
             // Clear the suggestedTags array before adding new suggestions
             suggestedTags[suggestionsId] = [];
