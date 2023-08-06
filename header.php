@@ -9,7 +9,7 @@
             <input class="form-control me-2" name="search" type="search" placeholder="Search" aria-label="Search" onkeyup="showSuggestions(this, 'suggestions2')" />
             <button class="btn btn-outline-success" type="submit">Search</button>
           </form>
-          <div class="container-fluid" id="suggestions2"></div>
+          <div id="suggestions2"></div>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0 fw-bold">
             <li class="nav-item">
               <a class="nav-link" href="index.php">Home</a>

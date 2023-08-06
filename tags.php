@@ -51,7 +51,7 @@ $tags = array_filter($tags);
           if ($countResult > 0):
         ?>
           <a href="tagged_images.php?tag=<?php echo urlencode($tag); ?>"
-             class="tag-button btn btn-sm btn-outline-dark">
+             class="tag-button btn btn-sm btn-outline-dark mb-1">
             <?php echo $tag; ?>
           </a>
         <?php endif; ?>
