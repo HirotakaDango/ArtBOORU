@@ -74,16 +74,15 @@ list($width, $height) = getimagesize('images/' . $image['filename']);
     <?php include('header.php'); ?>
     <main id="swup" class="transition-main">
     <div class="container-fluid">
-      <div class="alert alert-warning mt-3 fw-bold d-none d-md-block">compressed to <?php echo round($reduction_percentage, 2); ?>% <a href="images/<?php echo $image['filename']; ?>">view original</a></div>
       <div class="row">
-        <div class="col-md-7 order-md-1 mb-2">
+        <div class="col-md-7 order-md-1 mb-3">
           <div class="position-relative">
             <a href="images/<?php echo $image['filename']; ?>">
-              <img class="shadow rounded" src="thumbnails/<?php echo $image['filename']; ?>" width="100%" height="100%">
+              <img class="shadow rounded-4" src="thumbnails/<?php echo $image['filename']; ?>" width="100%" height="100%">
             </a>
             <div class="btn-group position-absolute bottom-0 end-0 m-2">
-              <a class="btn btn-sm btn-primary fw-bold rounded-start" href="images/<?php echo $image['filename']; ?>" download><i class="bi bi-cloud-arrow-down-fill"></i> Download Image</a> 
-              <button class="btn btn-sm btn-primary fw-bold rounded-end" onclick="sharePage()"><i class="bi bi-share-fill"></i> Share Image</button>
+              <a class="btn btn-sm btn-primary fw-bold rounded-start-3" href="images/<?php echo $image['filename']; ?>" download><i class="bi bi-cloud-arrow-down-fill"></i> Download Image</a> 
+              <button class="btn btn-sm btn-primary fw-bold rounded-end-3" onclick="sharePage()"><i class="bi bi-share-fill"></i> Share Image</button>
             </div>
             <?php if ($next_image): ?>
               <a class="btn opacity-75 rounded fw-bold position-absolute start-0 top-50 translate-middle-y ms-1 d-md-none" href="image.php?id=<?= $next_image['id'] ?>">
@@ -96,9 +95,9 @@ list($width, $height) = getimagesize('images/' . $image['filename']);
               </a>
             <?php endif; ?> 
           </div>
-          <div class="alert alert-warning mt-3 fw-bold d-md-none">compressed to <?php echo round($reduction_percentage, 2); ?>% <a href="images/<?php echo $image['filename']; ?>">view original</a></div>
         </div>
         <div class="col-md-5 order-md-1">
+          <div class="alert alert-warning fw-bold">compressed to <?php echo round($reduction_percentage, 2); ?>% <a href="images/<?php echo $image['filename']; ?>">view original</a></div>
           <div class="d-flex gap-2 mb-4">
             <?php if ($next_image): ?>
               <a class="image-containerA shadow rounded" href="?id=<?= $next_image['id'] ?>">
