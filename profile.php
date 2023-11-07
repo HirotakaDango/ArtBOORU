@@ -44,7 +44,7 @@
     <div class="images">
       <?php while ($image = $result->fetchArray()): ?>
         <div class="position-relative">
-          <a class="rounded shadow" href="image.php?filename=<?php echo $image['filename']; ?>">
+          <a class="rounded shadow" href="image.php?id=<?php echo $image['id']; ?>">
             <img class="lazy-load" data-src="thumbnails/<?php echo $image['filename']; ?>">
           </a> 
           <div class="btn-group position-absolute top-0 start-0 m-2">

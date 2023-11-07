@@ -34,7 +34,7 @@ $result = $stmt->execute();
     <div class="images">
       <?php while ($image = $result->fetchArray()): ?>
         <div class="image-container">
-          <a class="shadow rounded" href="image.php?filename=<?php echo $image['filename']; ?>">
+          <a class="shadow rounded" href="image.php?id=<?php echo $image['id']; ?>">
             <img class="lazy-load" data-src="thumbnails/<?php echo $image['filename']; ?>">
           </a>
         </div>

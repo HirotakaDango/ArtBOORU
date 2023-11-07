@@ -8,44 +8,34 @@ if (!isset($_SESSION['username'])) {
 // Connect to the database using PDO
 $db = new PDO('sqlite:database.sqlite');
 
-// Get the filename from the query string
-$filename = $_GET['filename'];
+// Get the image ID from the query string
+$image_id = $_GET['id'];
 
 // Get the current image information from the database
-$stmt = $db->prepare("SELECT * FROM images WHERE filename = :filename");
-$stmt->bindParam(':filename', $filename);
+$stmt = $db->prepare("SELECT * FROM images WHERE id = :image_id");
+$stmt->bindParam(':image_id', $image_id);
 $stmt->execute();
 $image = $stmt->fetch();
 
 // Get the ID of the current image and the username of the owner
-$image_id = $image['id'];
 $username = $image['username'];
 
 // Get the previous image information from the database
-$stmt = $db->prepare("SELECT * FROM images WHERE id < :id AND username = :username ORDER BY id DESC LIMIT 1");
-$stmt->bindParam(':id', $image_id);
+$stmt = $db->prepare("SELECT * FROM images WHERE id < :image_id AND username = :username ORDER BY id DESC LIMIT 1");
+$stmt->bindParam(':image_id', $image_id);
 $stmt->bindParam(':username', $username);
 $stmt->execute();
 $prev_image = $stmt->fetch();
 
 // Get the next image information from the database
-$stmt = $db->prepare("SELECT * FROM images WHERE id > :id AND username = :username ORDER BY id ASC LIMIT 1");
-$stmt->bindParam(':id', $image_id);
+$stmt = $db->prepare("SELECT * FROM images WHERE id > :image_id AND username = :username ORDER BY id ASC LIMIT 1");
+$stmt->bindParam(':image_id', $image_id);
 $stmt->bindParam(':username', $username);
 $stmt->execute();
 $next_image = $stmt->fetch();
 
-// Get the image information from the database
-$stmt = $db->prepare("SELECT * FROM images WHERE filename = :filename");
-$stmt->bindParam(':filename', $filename);
-$stmt->execute();
-$image = $stmt->fetch();
-
 // Check if the user is logged in and get their username
-$username = '';
-if (isset($_SESSION['username'])) {
-  $username = $_SESSION['username'];
-}
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
 
 // Get the username of the selected user
 $user_username = $image['username'];
@@ -55,12 +45,6 @@ $query = $db->prepare('SELECT * FROM users WHERE username = :username');
 $query->bindParam(':username', $user_username);
 $query->execute();
 $user = $query->fetch();
-
-// Get the image information from the database
-$stmt = $db->prepare("SELECT * FROM images WHERE filename = :filename");
-$stmt->bindParam(':filename', $filename);
-$stmt->execute();
-$image = $stmt->fetch();
 
 // Get image size of the original image in megabytes
 $original_image_size = round(filesize('images/' . $image['filename']) / (1024 * 1024), 2);
@@ -82,34 +66,64 @@ list($width, $height) = getimagesize('images/' . $image['filename']);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo $image['title']; ?></title>
     <?php include('bootstrapcss.php'); ?>
+    <link rel="stylesheet" href="transitions.css" />
+    <script type="module" src="swup.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
   <body>
     <?php include('header.php'); ?>
+    <main id="swup" class="transition-main">
     <div class="container-fluid">
-      <div class="alert alert-warning mt-3 fw-bold">compressed to <?php echo round($reduction_percentage, 2); ?>% <a href="images/<?php echo $filename; ?>">view original</a></div>
+      <div class="alert alert-warning mt-3 fw-bold d-none d-md-block">compressed to <?php echo round($reduction_percentage, 2); ?>% <a href="images/<?php echo $image['filename']; ?>">view original</a></div>
       <div class="row">
         <div class="col-md-7 order-md-1 mb-2">
           <div class="position-relative">
-            <a href="images/<?php echo $filename; ?>">
-              <img class="shadow rounded" src="thumbnails/<?php echo $filename; ?>" width="100%" height="100%">
+            <a href="images/<?php echo $image['filename']; ?>">
+              <img class="shadow rounded" src="thumbnails/<?php echo $image['filename']; ?>" width="100%" height="100%">
             </a>
             <div class="btn-group position-absolute bottom-0 end-0 m-2">
               <a class="btn btn-sm btn-primary fw-bold rounded-start" href="images/<?php echo $image['filename']; ?>" download><i class="bi bi-cloud-arrow-down-fill"></i> Download Image</a> 
               <button class="btn btn-sm btn-primary fw-bold rounded-end" onclick="sharePage()"><i class="bi bi-share-fill"></i> Share Image</button>
             </div>
             <?php if ($next_image): ?>
-              <button class="btn opacity-75 rounded fw-bold position-absolute start-0 top-50 translate-middle-y ms-1"  onclick="location.href='image.php?filename=<?= $next_image['filename'] ?>'">
+              <a class="btn opacity-75 rounded fw-bold position-absolute start-0 top-50 translate-middle-y ms-1 d-md-none" href="image.php?id=<?= $next_image['id'] ?>">
                 <i class="bi bi-arrow-left-circle-fill fs-1"></i>
-              </button>
+              </a>
             <?php endif; ?> 
             <?php if ($prev_image): ?>
-              <button class="btn opacity-75 rounded fw-bold position-absolute end-0 top-50 translate-middle-y me-1"  onclick="location.href='image.php?filename=<?= $prev_image['filename'] ?>'">
+              <a class="btn opacity-75 rounded fw-bold position-absolute end-0 top-50 translate-middle-y me-1 d-md-none" href="image.php?id=<?= $prev_image['id'] ?>">
                 <i class="bi bi-arrow-right-circle-fill fs-1"></i>
-              </button>
+              </a>
             <?php endif; ?> 
           </div>
+          <div class="alert alert-warning mt-3 fw-bold d-md-none">compressed to <?php echo round($reduction_percentage, 2); ?>% <a href="images/<?php echo $image['filename']; ?>">view original</a></div>
         </div>
         <div class="col-md-5 order-md-1">
+          <div class="d-flex gap-2 mb-4">
+            <?php if ($next_image): ?>
+              <a class="image-containerA shadow rounded" href="?id=<?= $next_image['id'] ?>">
+                <div class="position-relative">
+                  <img class="img-blur object-fit-cover rounded opacity-75" style="width: 100%; height: 160px;" src="../thumbnails/<?php echo $next_image['filename']; ?>" alt="<?php echo $next_image['title']; ?>">
+                  <h6 class="fw-bold shadowed-text text-white position-absolute top-50 start-50 translate-middle">
+                    <i class="bi bi-arrow-left-circle text-stroke"></i>
+                  </h6>
+                </div>
+              </a>
+            <?php endif; ?>
+            <a class="image-containerA shadow rounded" href="?id=<?= $image['id'] ?>">
+              <img class="object-fit-cover opacity-50 rounded" style="width: 100%; height: 160px;" src="../thumbnails/<?= $image['filename'] ?>" alt="<?php echo $image['title']; ?>">
+            </a>
+            <?php if ($prev_image): ?>
+              <a class="image-containerA shadow rounded" href="?id=<?= $prev_image['id'] ?>">
+                <div class="position-relative">
+                  <img class="img-blur object-fit-cover rounded opacity-75" style="width: 100%; height: 160px;" src="../thumbnails/<?php echo $prev_image['filename']; ?>" alt="<?php echo $prev_image['title']; ?>">
+                  <h6 class="fw-bold shadowed-text text-white position-absolute top-50 start-50 translate-middle">
+                    <i class="bi bi-arrow-right-circle text-stroke"></i>
+                  </h6>
+                </div>
+              </a>
+            <?php endif; ?>
+          </div>
           <?php
             $stmt = $db->prepare("SELECT u.id, u.username, u.password, u.artist, u.pic, u.desc, u.bgpic, i.id AS image_id, i.filename, i.tags FROM users u INNER JOIN images i ON u.id = i.id WHERE u.id = :id");
             $stmt->bindParam(':id', $id);
@@ -142,7 +156,7 @@ list($width, $height) = getimagesize('images/' . $image['filename']);
             echo "<li class='me-1 ms-1'>Image dimensions: " . $width . "x" . $height . "</li>";
             echo "<li class='me-1 ms-1'>Reduction percentage: " . round($reduction_percentage, 2) . "%</li>";
           ?>
-          <div class="mt-3">
+          <div class="my-3">
             <?php
               $tags = explode(',', $image['tags']);
               foreach ($tags as $tag) {
@@ -161,7 +175,22 @@ list($width, $height) = getimagesize('images/' . $image['filename']);
         </div>
       </div>
     </div>
+    </main>
     <div class="mt-5"></div>
+    <style>
+      .img-blur {
+        filter: blur(2px);
+      }
+
+      .image-containerA {
+        width: 33.33%;
+        flex-grow: 1;
+      }
+
+      .text-stroke {
+        -webkit-text-stroke: 1px;
+      }
+    </style>
     <script>
       function sharePage() {
         if (navigator.share) {

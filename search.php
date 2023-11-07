@@ -113,7 +113,7 @@ if (isset($_GET['search'])) {
             $tags = explode(',', $row['tags']);
             $tags = array_map('trim', $tags);
           ?>
-            <a class="rounded shadow" href="image.php?filename=<?php echo $row['filename']; ?>">
+            <a class="rounded shadow" href="image.php?id=<?php echo $row['id']; ?>">
               <img class="lazy-load" data-src="thumbnails/<?php echo $row['filename']; ?>" alt="<?php echo $row['title']; ?>">
             </a>
           <?php
