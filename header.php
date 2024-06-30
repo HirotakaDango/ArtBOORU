@@ -30,6 +30,10 @@
               <li class="nav-item">
                 <a class="nav-link <?php echo ($current_page_header == 'settings.php') ? 'active' : ''; ?>" href="settings.php">Settings</a>
               </li>
+            <?php else: ?>
+              <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page_header == 'settings.php') ? 'active' : ''; ?>" href="session.php">Login/Register</a>
+              </li>
             <?php endif; ?>
           </ul>
           <form class="d-flex" role="search" action="index.php">
