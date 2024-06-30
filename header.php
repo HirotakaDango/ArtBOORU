@@ -32,7 +32,7 @@
               </li>
             <?php else: ?>
               <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page_header == 'settings.php') ? 'active' : ''; ?>" href="session.php">Login/Register</a>
+                <a class="nav-link" href="session.php">Login/Register</a>
               </li>
             <?php endif; ?>
           </ul>
