@@ -414,7 +414,8 @@ $result = $stmt->execute();
     <nav aria-label="Page navigation" class="pagination d-flex gap-1 justify-content-center mt-3">
       <ul class="pagination">
         <?php if ($current_page > 1): ?>
-          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $current_page - 1; ?>"><i class="bi bi-chevron-double-left" style="-webkit-text-stroke: 1px;"></i></a></li>
+          <li class="page-item"><a class="page-link fw-medium" href="?page=1"><i class="bi bi-chevron-double-left" style="-webkit-text-stroke: 1px;"></i></a></li>
+          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $current_page - 1; ?>"><i class="bi bi-chevron-left" style="-webkit-text-stroke: 1px;"></i></a></li>
         <?php endif; ?>
 
         <?php
@@ -433,7 +434,8 @@ $result = $stmt->execute();
         <?php endfor; ?>
 
         <?php if ($current_page < ceil($total_images / $images_per_page)): ?>
-          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $current_page + 1; ?>"><i class="bi bi-chevron-double-right" style="-webkit-text-stroke: 1px;"></i></a></li>
+          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $current_page + 1; ?>"><i class="bi bi-chevron-right" style="-webkit-text-stroke: 1px;"></i></a></li>
+          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $end; ?>"><i class="bi bi-chevron-double-right" style="-webkit-text-stroke: 1px;"></i></a></li>
         <?php endif; ?>
       </ul>
     </nav>

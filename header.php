@@ -23,12 +23,14 @@
             <li class="nav-item">
               <a class="nav-link <?php echo (isset($_GET['artists']) && $_GET['artists'] == 'all') ? 'active' : ''; ?>" href="?artists=all">Users</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link <?php echo (isset($_GET['uid']) && $_GET['uid'] == $user['uid']) ? 'active' : ''; ?>" href="?uid=<?php echo $user['uid']; ?>">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link <?php echo ($current_page_header == 'settings.php') ? 'active' : ''; ?>" href="settings.php">Settings</a>
-            </li>
+            <?php if (isset($_SESSION['email'])): ?>
+              <li class="nav-item">
+                <a class="nav-link <?php echo (isset($_GET['uid']) && $_GET['uid'] == $user['uid']) ? 'active' : ''; ?>" href="?uid=<?php echo $user['uid']; ?>">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page_header == 'settings.php') ? 'active' : ''; ?>" href="settings.php">Settings</a>
+              </li>
+            <?php endif; ?>
           </ul>
           <form class="d-flex" role="search" action="index.php">
             <input class="form-control me-2" name="q" type="search" placeholder="Search" aria-label="Search"/>
