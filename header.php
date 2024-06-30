@@ -1,5 +1,5 @@
     <?php
-    $current_page = basename($_SERVER['PHP_SELF']);
+    $current_page_header = basename($_SERVER['PHP_SELF']);
     $has_query = !empty($_SERVER['QUERY_STRING']);
     ?>
     
@@ -12,10 +12,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link <?php echo ($current_page == 'index.php' && !$has_query) ? 'active' : ''; ?>" href="index.php">Home</a>
+              <a class="nav-link <?php echo ($current_page_header == 'index.php' && !$has_query) ? 'active' : ''; ?>" href="index.php">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link <?php echo ($current_page == 'upload.php') ? 'active' : ''; ?>" href="upload.php">Upload</a>
+              <a class="nav-link <?php echo ($current_page_header == 'upload.php') ? 'active' : ''; ?>" href="upload.php">Upload</a>
             </li>
             <li class="nav-item">
               <a class="nav-link <?php echo (isset($_GET['tags']) && $_GET['tags'] == 'all') ? 'active' : ''; ?>" href="?tags=all">Tags</a>
@@ -27,7 +27,7 @@
               <a class="nav-link <?php echo (isset($_GET['uid']) && $_GET['uid'] == $user['uid']) ? 'active' : ''; ?>" href="?uid=<?php echo $user['uid']; ?>">Profile</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link <?php echo ($current_page == 'settings.php') ? 'active' : ''; ?>" href="settings.php">Settings</a>
+              <a class="nav-link <?php echo ($current_page_header == 'settings.php') ? 'active' : ''; ?>" href="settings.php">Settings</a>
             </li>
           </ul>
           <form class="d-flex" role="search" action="index.php">

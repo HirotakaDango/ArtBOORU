@@ -123,13 +123,13 @@ if (isset($_FILES['image'])) {
     <?php include('header.php'); ?>
     <div class="container-fluid mt-2">
       <div class="row">
-        <div class="col-6">
-          <div class="caard">
+        <div class="col-md-6 mb-2 mb-md-0">
+          <div class="">
             <div id="preview-container"></div>
           </div>
         </div>
-        <div class="col-6">
-          <div class="caard container">
+        <div class="col-md-6">
+          <div class="caarcontainer">
             <form method="post" enctype="multipart/form-data">
               <input class="form-control mb-2 border rounded-3 text-secondary fw-bold border-4" type="file" name="image[]" id="file-ip-1" accept="image/*" onchange="showPreview(event);" multiple required>
               <div class="form-floating mb-2">

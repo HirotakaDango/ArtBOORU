@@ -414,15 +414,26 @@ $result = $stmt->execute();
     <nav aria-label="Page navigation" class="pagination d-flex gap-1 justify-content-center mt-3">
       <ul class="pagination">
         <?php if ($current_page > 1): ?>
-          <li class="page-item"><a class="page-link" href="?page=<?php echo $current_page - 1; ?>">Previous</a></li>
+          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $current_page - 1; ?>"><i class="bi bi-chevron-double-left" style="-webkit-text-stroke: 1px;"></i></a></li>
         <?php endif; ?>
-        <?php for ($i = 1; $i <= ceil($total_images / $images_per_page); $i++): ?>
+
+        <?php
+        $start = max(1, $current_page - 2);
+        $end = min($start + 4, ceil($total_images / $images_per_page));
+
+        if ($end - $start < 4) {
+           $start = max(1, $end - 4);
+        }
+
+        for ($i = $start; $i <= $end; $i++):
+        ?>
           <li class="page-item <?php if ($i == $current_page) echo 'active'; ?>">
-            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+            <a class="page-link fw-medium" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
           </li>
         <?php endfor; ?>
+
         <?php if ($current_page < ceil($total_images / $images_per_page)): ?>
-          <li class="page-item"><a class="page-link" href="?page=<?php echo $current_page + 1; ?>">Next</a></li>
+          <li class="page-item"><a class="page-link fw-medium" href="?page=<?php echo $current_page + 1; ?>"><i class="bi bi-chevron-double-right" style="-webkit-text-stroke: 1px;"></i></a></li>
         <?php endif; ?>
       </ul>
     </nav>
