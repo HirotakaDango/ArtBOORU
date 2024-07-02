@@ -81,21 +81,34 @@ if (isset($_GET['type']) && $_GET['type'] == 'image' && isset($_GET['action']) &
     $image_path = 'images/' . $edit_image['filename'];
     $thumbnail_path = 'thumbnails/' . $edit_image['filename'];
 
-    if (file_exists($image_path)) {
+    if (file_exists($image_path) && is_writable($image_path)) {
       unlink($image_path);
+    } else {
+      error_log("Failed to delete image file: $image_path");
     }
-    if (file_exists($thumbnail_path)) {
+
+    if (file_exists($thumbnail_path) && is_writable($thumbnail_path)) {
       unlink($thumbnail_path);
+    } else {
+      error_log("Failed to delete thumbnail file: $thumbnail_path");
     }
 
     // Delete image record from the database
     $stmt_delete = $db->prepare("DELETE FROM images WHERE id = :id");
     $stmt_delete->bindValue(':id', $image_id, SQLITE3_INTEGER);
-    $stmt_delete->execute();
+    $result = $stmt_delete->execute();
+
+    if ($result) {
+      $_SESSION['message'] = "Image deleted successfully.";
+    } else {
+      $_SESSION['error'] = "Failed to delete image from database.";
+      error_log("Failed to delete image from database. Image ID: $image_id");
+    }
 
     header("Location: index.php");
     exit;
   } else {
+    $_SESSION['error'] = "You don't have permission to delete this image or the image doesn't exist.";
     header("Location: index.php");
     exit;
   }
@@ -118,18 +131,205 @@ foreach ($params as $key => $value) {
 $stmt->bindValue(':limit', $images_per_page, SQLITE3_INTEGER);
 $stmt->bindValue(':offset', $offset, SQLITE3_INTEGER);
 $result = $stmt->execute();
+
+// Check if any images were uploaded
+if (isset($_FILES['image'])) {
+
+  ob_start(); // Start output buffering to prevent header errors
+
+  $images = $_FILES['image'];
+
+  // Loop through each uploaded image
+  for ($i = 0; $i < count($images['name']); $i++) {
+    $image = array(
+      'name' => $images['name'][$i],
+      'type' => $images['type'][$i],
+      'tmp_name' => $images['tmp_name'][$i],
+      'error' => $images['error'][$i],
+      'size' => $images['size'][$i]
+    );
+
+    // Check if the image is valid
+    if ($image['error'] == 0) {
+      // Generate a unique file name
+      $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
+      $filename = uniqid() . '.' . $ext;
+
+      // Save the original image
+      move_uploaded_file($image['tmp_name'], 'images/' . $filename);
+
+      // Determine the image type and generate the thumbnail
+      $image_info = getimagesize('images/' . $filename);
+      $mime_type = $image_info['mime'];
+      switch ($mime_type) {
+        case 'image/jpeg':
+          $source = imagecreatefromjpeg('images/' . $filename);
+          break;
+        case 'image/png':
+          $source = imagecreatefrompng('images/' . $filename);
+          break;
+        case 'image/gif':
+          $source = imagecreatefromgif('images/' . $filename);
+          break;
+        default:
+          echo "Error: Unsupported image format.";
+          exit;
+      }
+
+      if ($source === false) {
+        echo "Error: Failed to create image source.";
+        exit;
+      }
+
+      $original_width = imagesx($source);
+      $original_height = imagesy($source);
+      $ratio = $original_width / $original_height;
+      $thumbnail_width = 300;
+      $thumbnail_height = intval(300 / $ratio); // Convert float to integer
+
+      $thumbnail = imagecreatetruecolor($thumbnail_width, $thumbnail_height);
+
+      if ($thumbnail === false) {
+        echo "Error: Failed to create thumbnail.";
+        exit;
+      }
+
+      imagecopyresampled($thumbnail, $source, 0, 0, 0, 0, $thumbnail_width, $thumbnail_height, $original_width, $original_height);
+
+      switch ($ext) {
+        case 'jpg':
+        case 'jpeg':
+          imagejpeg($thumbnail, 'thumbnails/' . $filename);
+          break;
+        case 'png':
+          imagepng($thumbnail, 'thumbnails/' . $filename);
+          break;
+        case 'gif':
+          imagegif($thumbnail, 'thumbnails/' . $filename);
+          break;
+        default:
+          echo "Error: Unsupported image format.";
+          exit;
+      }
+
+      // Add the image to the database
+      $email = $_SESSION['email'];
+      $tags = filter_var($_POST['tags'], FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
+      $tags = explode(",", $tags);
+      $tags = array_map('trim', $tags); // Remove extra white space from each tag
+      $tags = array_filter($tags); // Remove any empty tags
+      $tags = array_values($tags); // Reset array indexes
+      $tags = implode(",", $tags); // Join tags by comma
+      $stmt = $db->prepare("INSERT INTO images (email, filename, tags) VALUES (:email, :filename, :tags)");
+      $stmt->bindValue(':email', $email);
+      $stmt->bindValue(':filename', $filename);
+      $stmt->bindValue(':tags', $tags);
+      $stmt->execute();
+    } else {
+      echo "Error uploading image.";
+    }
+  }
+
+  header("Location: index.php");
+  exit;
+}
 ?>
 
 <!DOCTYPE html>
 <html data-bs-theme="dark">
   <head>
-    <title>ArtBOORU</title>
+    <title>
+      <?php
+      if (isset($_GET['id'])) {
+        echo 'Image ID: ' . $_GET['id'];
+      } elseif (isset($_GET['artists'])) {
+        echo 'All Artists';
+      } elseif (isset($_GET['tags'])) {
+        echo 'All Tags';
+      } elseif (isset($_GET['userid'])) {
+        echo 'User ID: ' . $_GET['userid'];
+      } elseif (isset($_GET['q'])) {
+        echo 'Query: "' . $_GET['q'] . '"';
+      } else {
+        echo 'ArtBOORU';
+      }
+      ?>
+    </title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include('bootstrap.php'); ?>
   </head>
   <body>
     <?php include('header.php'); ?>
+    <?php if (isset($_SESSION['email'])): ?>
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-fullscreen">
+          <div class="modal-content">
+            <div class="modal-header border-0">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Upload</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body mt-2">
+              <div class="row">
+                <div class="col-md-6 mb-2 mb-md-0">
+                  <div class="">
+                    <div id="preview-container"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="caarcontainer">
+                    <form method="post" enctype="multipart/form-data">
+                      <input class="form-control mb-2 border rounded-3 text-secondary fw-bold border-4" type="file" name="image[]" id="file-ip-1" accept="image/*" onchange="showPreview(event);" multiple required>
+                      <div class="form-floating mb-2">
+                        <input class="form-control border rounded-3 text-secondary fw-bold border-4" type="text" name="tags" placeholder="Enter tag for your image" maxlength="180" required>  
+                        <label for="floatingInput" class="text-secondary fw-bold">Enter tag for your image</label>
+                      </div>
+                      <input class="btn btn-lg btn-primary fw-bold w-100" type="submit" name="submit" value="upload">
+                    </form> 
+                  </div> 
+                </div>
+              </div>
+            </div>
+            <div class="mt-5"></div>
+            <script>
+              function showPreview(event) {
+                // Get the container for the preview images
+                var container = document.getElementById("preview-container");
+        
+                // Clear any existing preview images
+                container.innerHTML = "";
+        
+                // Set the height of the image based on the viewport width and number of images
+                var imgHeight = window.innerWidth < 768 ? (event.target.files.length > 1 ? 200 : 400) : (event.target.files.length > 2 ? 100 : 424);
+        
+                // Loop through all selected files
+                for (var i = 0; i < event.target.files.length; i++) {
+                  // Create a new image element for each file
+                  var img = document.createElement("img");
+                  img.style.width = "100%";
+                  img.style.height = imgHeight + "px";
+                  img.classList.add("rounded", "object-fit-cover", "shadow");
+        
+                  // Set the source of the image to the URL of the file
+                  img.src = URL.createObjectURL(event.target.files[i]);
+        
+                  // Add the image element to the container
+                  container.appendChild(img);
+                }
+          
+                // Set the grid display properties
+                container.style.display = "grid";
+                container.style.gridTemplateColumns = "repeat(auto-fit, minmax(150px, 1fr))";
+                container.style.gridGap = "2px";
+                container.style.justifyContent = "center";
+                container.style.marginRight = "3px";
+                container.style.marginLeft = "3px";
+              }
+            </script>
+          </div>
+        </div>
+      </div>
+    <?php endif; ?>
     <?php if (isset($_GET['view']) && $_GET['view'] == 'image' && isset($_GET['id'])): 
       $image_id = intval($_GET['id']);
       $stmt = $db->prepare("SELECT images.*, users.*, users.id AS uid FROM images JOIN users ON images.email = users.email WHERE images.id = :id");
@@ -220,6 +420,7 @@ $result = $stmt->execute();
                 $reduction_percentage = ((($original_image_size - $thumbnail_image_size) / $original_image_size) * 100);
                 ?>
                 <h6 class="fw-medium small">Uploaded by: <a class="text-decoration-none" href="?userid=<?php echo $image['uid']; ?>"><?php echo $image['artist']; ?></a><h6>
+                <h6 class="fw-medium small">Image ID: <?php echo $_GET['id']; ?><h6>
                 <h6 class="fw-medium small">Filename: <?php echo $image['filename']; ?><h6>
                 <h6 class="fw-medium small">Compressed: <?php echo round($reduction_percentage, 2); ?>%<h6>
                 <h6 class="fw-medium small">Date: <?php echo date("l, d F, Y", filemtime($image_path)); ?><h6>
@@ -229,8 +430,8 @@ $result = $stmt->execute();
                 <h5 class="fw-bold mt-4">Options</h5>
                 <a class="text-decoration-none fw-medium small" href="#" data-bs-toggle="modal" data-bs-target="#shareLink">Share</a></br>
                 <?php if ($image['email'] == $email): ?>
-                  <a class="text-decoration-none fw-medium small" href="?type=image&action=edit&id=<?php echo $image['id']; ?>">Edit</a></br>
-                  <a class="text-decoration-none fw-medium small" href="?type=image&action=delete&id=<?php echo $image['id']; ?>" onclick="return confirm('Are you sure you want to delete this image?');">Delete</a></br>
+                  <a class="text-decoration-none fw-medium small" href="?type=image&action=edit&id=<?php echo $_GET['id']; ?>">Edit</a></br>
+                  <a class="text-decoration-none fw-medium small" href="?type=image&action=delete&id=<?php echo $_GET['id']; ?>" onclick="return confirm('Are you sure you want to delete this image?');">Delete</a></br>
                 <?php endif; ?>
                 <a class="text-decoration-none fw-medium small" href="images/<?php echo $image['filename']; ?>" download>Download</a></br>
                 <a class="text-decoration-none fw-medium small" href="images/<?php echo $image['filename']; ?>">View original</a>

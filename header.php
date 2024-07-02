@@ -14,9 +14,11 @@
             <li class="nav-item">
               <a class="nav-link <?php echo ($current_page_header == 'index.php' && !$has_query) ? 'active' : ''; ?>" href="index.php">Home</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link <?php echo ($current_page_header == 'upload.php') ? 'active' : ''; ?>" href="upload.php">Upload</a>
-            </li>
+            <?php if (isset($_SESSION['email'])): ?>
+              <li class="nav-item">
+                <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#exampleModal">Upload</button>
+              </li>
+            <?php endif; ?>
             <li class="nav-item">
               <a class="nav-link <?php echo (isset($_GET['tags']) && $_GET['tags'] == 'all') ? 'active' : ''; ?>" href="?tags=all">Tags</a>
             </li>
